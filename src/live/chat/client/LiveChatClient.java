@@ -5,10 +5,8 @@
 package live.chat.client;
 import java.io.*;
 import java.net.*;
-/**
- *
- * @author panos
- */
+
+
 public class LiveChatClient {
 
     /**
