@@ -27,29 +27,27 @@ public class LiveChatClient {
         InputStream serverIn = connectToServer.getInputStream();
         OutputStream serverOut = connectToServer.getOutputStream();
         System.out.println("connected successfully to the server@"+connectToServer.getInetAddress().toString());
+        ClientInputHandler handler = new ClientInputHandler(connectToServer);
         String line = "";
         String msgStr = "";
         int data;
+        Thread handleClientInput = new Thread(handler);
+        handleClientInput.start();
         while(connectToServer.isConnected() && !connectToServer.isClosed()){
-            System.out.println("give input");
-            line = buffer.readLine(); //do it in a thread it hangs here and wait for input and wont print incoming messages
-            byte[] msg = line.getBytes();
-            serverOut.write(msg); // write -1 does not work because it is 255 maybe it is the representation using 2's complement
-            serverOut.write(4);
-            if(line.equals("\\bye")){
-                connectToServer.close();
-                serverIn.close();
-                serverOut.close();
-                buffer.close();
-            }
+            
+            try{
             while((data = serverIn.read()) != 4){ // it's ok if no msg its cooming it does not hang here
                 msgStr+=(char)data;
+            }}catch(SocketException ex){
+                System.out.println("socket is closed");
+                break;
             }
             System.out.println(msgStr);
             msgStr = "";
         }
         System.out.println("Disconnected from the server.");
         System.out.println("Run the program again if you want to reconnect.");
+        System.exit(0);
     }
     
 }
